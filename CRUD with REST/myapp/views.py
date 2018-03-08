@@ -3,8 +3,8 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Bucketlist
-from .serializers import BucketlistSerializer
+from .models import Bucketlist,User,Tech
+from .serializers import BucketlistSerializer,UserSerializer,TechSerializer
 
 # Create your views here.
 class bucketlist(APIView):
@@ -47,3 +47,43 @@ class bucketdetail(APIView):
         bucket = self.get_object(pk)
         bucket.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+#----------------the User API View--------------------------------------------
+
+class user(APIView):
+    def get(self,request,format=None):
+        ulist = User.objects.all()
+        serializer = UserSerializer(ulist,many=True)
+        return Response(serializer.data)
+
+    def post(self,request,format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status = status.HTTP_201_CREATED)
+        return Response(serializer.errors,status = status.HTTP_400_BAD_REQUEST)
+
+#------------the User Details API View ------------------------------------------
+
+class userDetails(APIView):
+    def get(self,request,fk,format=None):
+        temp_user = User.objects.filter(bucket_id=fk)
+        serializer = UserSerializer(temp_user,many=True)
+        return Response(serializer.data)
+
+
+#-------------------the Tech API View--------------------------------------------
+
+class tech(APIView):
+    def get(self,request,format=None):
+        tlist = Tech.objects.all()
+        serializer = TechSerializer(tlist,many=True)
+        return Response(serializer.data)
+
+    def post(self,request,format=None):
+        serializer = TechSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status = status.HTTP_201_CREATED)
+        return Response(serializer.errors,status = status.HTTP_400_BAD_REQUEST)
